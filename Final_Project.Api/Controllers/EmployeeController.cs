@@ -2,17 +2,16 @@
 using Business.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Final_Project.Api.Controllers;
-
-public class EmployeeController : Controller
+namespace Final_Project.Api.Controllers
 {
+    // The Controller should be named "EmployeeController" (no need for an extra nested "EmployeesController").
     [Route("api/[controller]")]
     [ApiController]
-    public class EmployeesController : ControllerBase
+    public class EmployeeController : ControllerBase
     {
         private readonly IEmployeeServices _employeeServices;
 
-        public EmployeesController(IEmployeeServices employeeServices)
+        public EmployeeController(IEmployeeServices employeeServices)
         {
             _employeeServices = employeeServices;
         }
