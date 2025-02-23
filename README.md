@@ -4,6 +4,9 @@
 
 A fast way of doing this is by pressing `CTRL + F` in VS and searching by `UseSqlServer` to find all instances this appears. I cannot guarantee that the string formatting is consistent so I leave that in your hands. 
 
+It's also important to update the connection string being used in the frontend (MAUI Blazor) `GUI_project`. You can do that by finding `Final_Project_Sql\GUI_project\wwwroot\appsettings.json` and updating the connection string there. 
+
+
 ### How to use
 - The Application is pretty self contained and should be rather clear on how to use based on the instructions provided in the different pages. 
 - Create an Employee first then create a Project. 
