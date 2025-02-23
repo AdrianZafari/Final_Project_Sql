@@ -9,3 +9,7 @@ A fast way of doing this is by pressing `CTRL + F` in VS and searching by `UseSq
 - Create an Employee first then create a Project. 
 - Delete an Employee referenced in a Project and the backend will get upset with you (sorry). 
 - I wrote warnings, but it's on you to follow them.  
+
+As an aside:
+
+I made an API with some instructions from ChatGPT as to what the main steps are for writing an API and what libraries must be used; it wouldn't connect to my frontend. The API is functional and could connect to the Database, unfortunately, setting it up with MAUI Blazor was rather hectic and wound up going nowhere. That's why there's a random API just sitting there in the directory, figured I might as well include it. 
