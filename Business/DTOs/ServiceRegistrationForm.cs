@@ -16,10 +16,12 @@ public class ServiceRegistrationForm
     public string Service_Name { get; set; } = null!;
     
     public string? Service_Description { get; set; }
-    
+
+    public int Service_Id {  get; set; } // Added for frontend to be able to delete services when editing, functionally useless otherwise
+
     [Required]
     [Range(0, 99999999.99, ErrorMessage = "Price must be a valid positive number.")]
-    public decimal Service_Price { get; set; }
+    public decimal Service_Price { get; set; } = 0m;
     
 
 

@@ -33,7 +33,7 @@ public class ProjectRepository_Tests : IDisposable // I wound up retroactively a
             Customer_Id = 20,
             Customer_ContactPerson_Id = 30,
             StartDate = DateTime.Now,
-            Status = ProjectStatus.Ongoing,
+            Status = ProjectStatus.Active,
         };
 
         // Act
@@ -56,7 +56,7 @@ public class ProjectRepository_Tests : IDisposable // I wound up retroactively a
             Customer_Id = 21,
             Customer_ContactPerson_Id = 31,
             StartDate = DateTime.Now,
-            Status = ProjectStatus.Ongoing,
+            Status = ProjectStatus.Active,
             ProjectNumber = "P-2"
         };
 
@@ -207,7 +207,7 @@ public class ProjectRepository_Tests : IDisposable // I wound up retroactively a
             Customer_Id = 28,
             Customer_ContactPerson_Id = 38,
             StartDate = DateTime.Now,
-            Status = ProjectStatus.Ongoing,
+            Status = ProjectStatus.Active,
             ProjectNumber = "P-8"
         };
         await _projectRepository.CreateAsync(entity);

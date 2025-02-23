@@ -11,6 +11,7 @@
         Register Employees
     </button>
 </div>
+<p class="text-secondary fst-italic mb-5">Warning: Please make sure to dereference an employee from any Project prior to deleting the employee</p>
 
 <!-- Search Bar -->
 <div class="input-group mb-3">
@@ -30,6 +31,7 @@
                 </h2>
                 <div id="collapse-@employee.Employee_Id" class="accordion-collapse collapse" data-bs-parent="#employeeAccordion">
                     <div class="accordion-body">
+                        <p><strong>Id:</strong> @employee.Employee_Id</p>
                         <p><strong>Name:</strong> @employee.FirstName @employee.LastName</p>
                         <p><strong>Email:</strong> @employee.Employee_Email</p>
                         <p><strong>Phone:</strong> @(employee.PhoneNumber ?? "N/A")</p>
@@ -64,6 +66,7 @@ else
             </div>
             <div class="modal-body">
                 Are you sure you want to delete this employee?
+                <p class="text-danger">@deleteErrorMessage</p> <!-- Show error message if deletion fails -->
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -78,6 +81,7 @@ else
     private IEnumerable<Employee>? allEmployees;
     private IEnumerable<Employee>? filteredEmployees;
     private int? employeeIdToDelete;
+    private string deleteErrorMessage = string.Empty; // Store error message for UI feedback
 
     protected override async Task OnInitializedAsync()
     {
@@ -96,16 +100,18 @@ else
             string trimmedQuery = searchQuery.Trim().ToLowerInvariant();
             filteredEmployees = allEmployees?.Where(e =>
                 e.FirstName.ToLowerInvariant().Contains(trimmedQuery) ||
+                e.Employee_Id.ToString().Contains(trimmedQuery) ||
                 e.LastName.ToLowerInvariant().Contains(trimmedQuery) ||
                 e.Employee_Email.ToLowerInvariant().Contains(trimmedQuery) ||
                 (e.PhoneNumber?.Contains(trimmedQuery) ?? false) ||
                 e.Employee_Role_Name.ToLowerInvariant().Contains(trimmedQuery));
+
         }
     }
 
     private void NavigateToCreate()
     {
-        NavigationManager.NavigateTo($"/create-employee");
+        NavigationManager.NavigateTo("/create-employee");
     }
 
     private void NavigateToEdit(int employeeId)
@@ -116,14 +122,20 @@ else
     private void SetEmployeeForDelete(int employeeId)
     {
         employeeIdToDelete = employeeId;
+        deleteErrorMessage = string.Empty; // Clear previous error message
     }
 
     private async Task ConfirmDeleteEmployee()
     {
         if (employeeIdToDelete.HasValue)
         {
-            bool isDeleted = await EmployeeService.DeleteEmployeeAsync(employeeIdToDelete.Value);
-            if (isDeleted)
+            var result = await EmployeeService.DeleteEmployeeAsync(employeeIdToDelete.Value);
+
+            if (!result) // If deletion failed, show an error message
+            {
+                deleteErrorMessage = "This employee is assigned as a project leader. Please reassign the project leader before deletion.";
+            }
+            else
             {
                 allEmployees = await EmployeeService.GetAllEmployees();
                 FilterEmployees();

@@ -6,7 +6,7 @@ namespace Business.Interfaces
 {
     public interface IProjectFactory
     {
-        Project Create(ProjectEntity entity);
+        Task<Project> CreateAsync(ProjectEntity entity);
         Task<ProjectEntity> CreateAsync(ProjectRegistrationForm form);
     }
 }

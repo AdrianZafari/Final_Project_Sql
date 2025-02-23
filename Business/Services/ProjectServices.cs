@@ -1,7 +1,6 @@
 ﻿
 
 using Business.DTOs;
-using Business.Factories;
 using Business.Interfaces;
 using Business.Models;
 using Data.Entities;
@@ -69,7 +68,11 @@ public class ProjectServices(IProjectRepository projectRepository, ICustomerRepo
             // 6. Commit Transaction if everything is successful
             await _projectRepository.CommitTransactionAsync();
 
-            var project = _projectFactory.Create(projectEntity);
+            var project = await _projectFactory.CreateAsync(projectEntity);
+            project.Customer_Name = form.Customer_Name;
+            project.ProjectStatus = (Business.Models.ProjectStatus)form.Status; // explicit casting the status 
+
+
 
             return project;
         }
@@ -91,7 +94,9 @@ public class ProjectServices(IProjectRepository projectRepository, ICustomerRepo
 
             foreach (var entity in entities)
             {
-                var project = _projectFactory.Create(entity);
+                var project = await _projectFactory.CreateAsync(entity);
+                var customerEntity = await _customerRepository.GetAsync(c => c.Customer_Id == project.Customer_Id);
+                project.Customer_Name = customerEntity.Customer_Name;
                 projects.Add(project);
             }
 
@@ -116,7 +121,9 @@ public class ProjectServices(IProjectRepository projectRepository, ICustomerRepo
                 return null!;
             }
 
-            Project project = _projectFactory.Create(entity);
+            Project project = await _projectFactory.CreateAsync(entity);
+            var customerEntity = await _customerRepository.GetAsync(c => c.Customer_Id == project.Customer_Id);
+            project.Customer_Name = customerEntity.Customer_Name;
             return project;
         }
         catch (Exception ex)
@@ -202,7 +209,9 @@ public class ProjectServices(IProjectRepository projectRepository, ICustomerRepo
             await _projectRepository.CommitTransactionAsync();
 
             // Return Project instead of Entity
-            var targetProject = _projectFactory.Create(targetProjectEntity);
+            var targetProject = await _projectFactory.CreateAsync(targetProjectEntity);
+            var customerEntity = await _customerRepository.GetAsync(c => c.Customer_Id == targetProject.Customer_Id);
+            targetProject.Customer_Name = customerEntity.Customer_Name;
 
             return targetProject;
         }

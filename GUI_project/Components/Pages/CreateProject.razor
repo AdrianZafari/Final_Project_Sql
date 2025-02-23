@@ -1,4 +1,195 @@
 ﻿@page "/create-project"
+@using Business.Interfaces
+@using Business.DTOs
+@using Business.Models
+@using Microsoft.AspNetCore.Components.Forms
+@inject IProjectServices ProjectService
+@inject IEmployeeServices EmployeeService
+@inject IServiceServices ServiceService
+@inject NavigationManager NavigationManager
 
-<h1 class="fw-bold mb-4">Create Project</h1>
+<h1 class="fw-bold mb-4">Create New Project</h1>
+<p>Fill in the details below and press "Create Project".</p>
+<p>Make sure that an employee has been added before creating a project.</p>
+<hr class="mb-4" />
 
+<EditForm Model="@projectForm" OnValidSubmit="HandleSubmit" autocomplete="off">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <!-- Customer Name -->
+    <h5 class="fw-bold mt-2 mb-4 text-decoration-underline">Customer</h5>
+    <div class="form-group pb-2">
+        <label for="customerName"><span class="text-muted">*</span> Customer Name</label>
+        <InputText id="customerName" class="form-control" @bind-Value="projectForm.Customer_Name" />
+    </div>
+
+    <!-- Contact Person Details -->
+    <h5 class="fw-bold mt-5 mb-4 text-decoration-underline">Contact Person</h5>
+    <div class="form-group pb-2">
+        <label for="firstName"><span class="text-muted">*</span> First Name</label>
+        <InputText id="firstName" class="form-control" @bind-Value="projectForm.FirstName" />
+    </div>
+
+    <div class="form-group pb-2">
+        <label for="lastName"><span class="text-muted">*</span> Last Name</label>
+        <InputText id="lastName" class="form-control" @bind-Value="projectForm.LastName" />
+    </div>
+
+    <div class="form-group pb-2">
+        <label for="email"><span class="text-muted">*</span> Email</label>
+        <InputText id="email" class="form-control" @bind-Value="projectForm.Email" />
+    </div>
+
+    <div class="form-group pb-2">
+        <label for="phone">Phone Number</label>
+        <InputText id="phone" class="form-control" @bind-Value="projectForm.Phone" />
+    </div>
+
+    <!-- Project Details -->
+    <h5 class="fw-bold mt-5 mb-4 text-decoration-underline">Project Details</h5>
+    <div class="form-group pb-2">
+        <label for="projectLeader"><span class="text-muted">*</span> Project Leader</label>
+        <InputSelect id="projectLeader" class="form-control" @bind-Value="projectForm.ProjectLeader_Id">
+            <option value="">-- Select Project Leader --</option>
+            @foreach (var leader in ProjectLeaders)
+            {
+                <option value="@leader.Employee_Id">[@leader.Employee_Id] @leader.FirstName @leader.LastName</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="form-group pb-2">
+        <label for="startDate"><span class="text-muted">*</span> Start Date</label>
+        <InputDate id="startDate" class="form-control" @bind-Value="projectForm.StartDate" />
+    </div>
+
+    <div class="form-group pb-2">
+        <label for="deadline">Deadline</label>
+        <InputDate id="deadline" class="form-control" @bind-Value="projectForm.Deadline" />
+    </div>
+
+    <div class="form-group pb-2">
+        <label for="status"><span class="text-muted">*</span> Project Status</label>
+        <InputSelect id="status" class="form-control" @bind-Value="projectForm.Status">
+            @foreach (var status in Enum.GetValues(typeof(ProjectStatus)).Cast<ProjectStatus>())
+            {
+                <option value="@status">@status</option>
+            }
+        </InputSelect>
+    </div>
+
+    <hr />
+
+    <!-- Service Forms Section -->
+    <h5 class="fw-bold mt-5 mb-4 text-decoration-underline">Services</h5>
+    <div class="row">
+        @foreach (var serviceForm in serviceForms)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card p-3 shadow-sm">
+                    <div class="form-group pb-2">
+                        <label for="serviceName"><span class="text-muted">*</span>Service Name</label>
+                        <InputText id="serviceName" class="form-control" @bind-Value="serviceForm.Service_Name" />
+                    </div>
+
+                    <div class="form-group pb-2">
+                        <label for="serviceDescription">Service Description</label>
+                        <InputText id="serviceDescription" class="form-control" @bind-Value="serviceForm.Service_Description" />
+                    </div>
+
+                    <div class="form-group pb-2">
+                        <label for="servicePrice"><span class="text-muted">*</span>Service Price</label>
+                        <InputNumber id="servicePrice" class="form-control" @bind-Value="serviceForm.Service_Price" />
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <button type="button" class="btn btn-secondary mb-3" @onclick="AddNewServiceForm">Add New Service</button>
+
+    <button type="submit" class="btn btn-primary mt-3 mb-5 float-end">Create Project</button>
+</EditForm>
+
+<p class="@messageClass">@message</p>
+
+@code {
+    private ProjectRegistrationForm projectForm = new();
+    private List<Employee> ProjectLeaders = new();
+    private string message = "";
+    private string messageClass = "";
+    private List<ServiceRegistrationForm> serviceForms = new(); // List of services to be submitted
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            ProjectLeaders = await EmployeeService.GetAllEmployees(); // Fetch project leaders
+        }
+        catch (Exception ex)
+        {
+            message = $"Error fetching project leaders: {ex.Message}";
+            messageClass = "text-danger fw-bold";
+        }
+    }
+
+    private void AddNewServiceForm()
+    {
+        serviceForms.Add(new ServiceRegistrationForm()); // Add a new service form to the list
+    }
+
+    private async Task HandleSubmit()
+    {
+        // Trim whitespace from string fields in project form
+        foreach (var property in projectForm.GetType().GetProperties())
+        {
+            if (property.PropertyType == typeof(string))
+            {
+                var currentValue = (string?)property.GetValue(projectForm);
+                if (!string.IsNullOrEmpty(currentValue))
+                {
+                    property.SetValue(projectForm, currentValue.Trim());
+                }
+            }
+        }
+
+        try
+        {
+            // Step 1: Create the project
+            var newProject = await ProjectService.CreateProjectAsync(projectForm);
+
+            if (newProject != null)
+            {
+                message = "Project created successfully!";
+                messageClass = "text-success fw-bold";
+
+                // Step 2: Create services for the new project
+                foreach (var serviceForm in serviceForms)
+                {
+                    // Only submit services that have a non-empty name and price
+                    if (!string.IsNullOrWhiteSpace(serviceForm.Service_Name) && serviceForm.Service_Price > 0)
+                    {
+                        serviceForm.Project_Id = newProject.Project_Id;
+                        await ServiceService.CreateServiceAsync(newProject.Project_Id, serviceForm);
+                    }
+                }
+
+                projectForm = new ProjectRegistrationForm();
+                serviceForms.Clear(); // Clear the service forms
+
+                NavigationManager.NavigateTo("/"); // Redirect to home page (projects list)
+            }
+            else
+            {
+                message = "Error creating project. Please try again.";
+                messageClass = "text-danger fw-bold";
+            }
+        }
+        catch (Exception ex)
+        {
+            message = $"Error: {ex.Message}";
+            messageClass = "text-danger fw-bold";
+        }
+    }
+}

@@ -9,7 +9,7 @@ using Data.Repositories;
 
 namespace Business.Factories;
 
-public class ProjectFactory(ICustomerRepository customerRepository, ICustomer_ContactPersonRepository contactPersonRepository, IEmployeeRepository employeeRepository) : IProjectFactory
+public class ProjectFactory(ICustomerRepository customerRepository, ICustomer_ContactPersonRepository contactPersonRepository, IEmployeeRepository employeeRepository) :  IProjectFactory
 {
     private readonly ICustomerRepository _customerRepository = customerRepository;
     private readonly ICustomer_ContactPersonRepository _contactPersonRepository = contactPersonRepository;
@@ -44,8 +44,12 @@ public class ProjectFactory(ICustomerRepository customerRepository, ICustomer_Co
         };
     }
 
-    public Project Create(ProjectEntity entity)
+    public async Task<Project> CreateAsync(ProjectEntity entity)
     {
+        var contactPerson = await _contactPersonRepository.GetAsync(cp => cp.Customer_ContactPerson_Id == entity.Customer_ContactPerson_Id);
+
+        var employeeEntity = await _employeeRepository.GetAsync(em => em.Employee_Id == entity.ProjectLeader_Id);
+
         if (entity == null)
         {
             return null!;
@@ -55,13 +59,20 @@ public class ProjectFactory(ICustomerRepository customerRepository, ICustomer_Co
         {
             Project_Id = entity.Project_Id,
             ProjectLeader_Id = entity.ProjectLeader_Id,
+            Project_Leader_FirstName = employeeEntity.FirstName,
+            Project_Leader_LastName = employeeEntity.LastName,
             Customer_Id = entity.Customer_Id,
             ContactPerson_Id = entity.Customer_ContactPerson_Id,
+            ContactPerson_FirstName = contactPerson.FirstName,
+            ContactPerson_LastName = contactPerson.LastName,
+            ContactPerson_Email = contactPerson.Email,
+            ContactPerson_Phone = contactPerson.Phone!,
             ProjectNumber = entity.ProjectNumber!,
             StartDate = entity.StartDate,
             EndDate = entity.EndDate,
             Deadline = entity.Deadline,
-            ProjectStatus = entity.Status
+            ProjectStatus = (Business.Models.ProjectStatus)entity.Status
+            // Because they are technically seperate enums, we explicitly cast
         };
 
 

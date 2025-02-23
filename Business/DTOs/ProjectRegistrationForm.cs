@@ -46,5 +46,5 @@ public class ProjectRegistrationForm
 
     [Required]
     [EnumDataType(typeof(ProjectStatus))]
-    public ProjectStatus Status { get; set; } = ProjectStatus.Ongoing;
+    public ProjectStatus Status { get; set; } = ProjectStatus.Active;
 }

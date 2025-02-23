@@ -85,10 +85,34 @@ public class ServiceServices(IServiceRepository serviceRepository) : IServiceSer
 
             foreach (var entity in entities)
             {
-                 services.Add(ServiceFactory.Create(entity));
+                services.Add(ServiceFactory.Create(entity));
             }
 
             return services;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Error fetching services:: {ex.Message}");
+            return null!; ;
+        }
+    }
+
+    public async Task<Service> GetServiceByServiceIdAsync(int serviceId)
+    {
+        try
+        {
+            var entity = await _serviceRepository.GetAsync(s => s.Service_Id == serviceId);
+
+            if (entity == null)
+            {
+                Debug.WriteLine($"Service with Id:: {serviceId} not found.");
+                return null!;
+            }
+
+            var service = ServiceFactory.Create(entity);
+
+
+            return service;
         }
         catch (Exception ex)
         {

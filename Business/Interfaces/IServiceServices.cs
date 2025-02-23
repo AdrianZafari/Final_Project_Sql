@@ -9,5 +9,6 @@ public interface IServiceServices
     Task<bool> DeleteServiceAsync(int serviceId);
     Task<IEnumerable<Service>> GetAllServices();
     Task<List<Service>> GetAllServicesByProjectIdAsync(int ProjectId);
+    Task<Service> GetServiceByServiceIdAsync(int serviceId);
     Task<Service> UpdateServiceAsync(int serviceId, ServiceRegistrationForm updatedForm);
 }

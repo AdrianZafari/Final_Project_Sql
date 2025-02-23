@@ -43,7 +43,7 @@ public class ServiceServices_Tests : IDisposable
         _employeeRoleRepository = new Employee_RoleRepository(_context);
         _projectFactory = new ProjectFactory(_customerRepository, _contactPersonRepository, _employeeRepository);
         _employeeFactory = new EmployeeFactory(_employeeRoleRepository);
-        _employeeServices = new EmployeeServices(_employeeRepository, _employeeRoleRepository, _employeeFactory);
+        _employeeServices = new EmployeeServices(_employeeRepository, _employeeRoleRepository, _employeeFactory, _projectRepository);
         _serviceRepository = new ServiceRepository(_context);
 
 

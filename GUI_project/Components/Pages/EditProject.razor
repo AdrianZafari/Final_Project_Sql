@@ -1,3 +1,214 @@
-﻿@page "/edit-project"
+﻿@page "/edit-project/{id:int}"
+@using Business.Interfaces
+@using Business.DTOs
+@using Business.Models
+@inject IProjectServices ProjectService
+@inject IEmployeeServices EmployeeService
+@inject IServiceServices ServiceService
+@inject NavigationManager NavigationManager
 
 <h1 class="fw-bold mb-4">Edit Project</h1>
+<p>The Customer and Email of the Contact Person cannot be edited.<br /> 
+    Delete this project and create a new one if those fields need to be changed.</p>
+<hr class="mb-5" />
+
+<EditForm Model="@updatedProjectForm" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <!-- Customer Name -->
+    <div class="form-group pb-2">
+        <label for="customerName" class="pb-1"><span class="text-muted">*</span> Customer Name</label>
+        <InputText id="customerName" class="form-control" @bind-Value="updatedProjectForm.Customer_Name" readonly />
+    </div>
+
+    <!-- Contact Person Details -->
+    <h5 class="fw-bold mt-5 mb-4 text-decoration-underline">Contact Person</h5>
+    <div class="form-group pb-2">
+        <label for="firstName"><span class="text-muted">*</span> First Name</label>
+        <InputText id="firstName" class="form-control" @bind-Value="updatedProjectForm.FirstName" />
+    </div>
+
+    <div class="form-group pb-2">
+        <label for="lastName"><span class="text-muted">*</span> Last Name</label>
+        <InputText id="lastName" class="form-control" @bind-Value="updatedProjectForm.LastName" />
+    </div>
+
+    <div class="form-group pb-2">
+        <label for="email"><span class="text-muted">*</span> Email</label>
+        <InputText id="email" class="form-control" @bind-Value="updatedProjectForm.Email" readonly />
+    </div>
+
+    <div class="form-group pb-2">
+        <label for="phone">Phone Number</label>
+        <InputText id="phone" class="form-control" @bind-Value="updatedProjectForm.Phone" />
+    </div>
+
+    <!-- Project Details -->
+    <h5 class="fw-bold mt-5 mb-4 text-decoration-underline">Project Details</h5>
+    <div class="form-group pb-2">
+        <label for="projectLeader"><span class="text-muted">*</span> Project Leader</label>
+        <InputSelect id="projectLeader" class="form-control" @bind-Value="updatedProjectForm.ProjectLeader_Id">
+            <option value="">-- Select Project Leader --</option>
+            @foreach (var leader in ProjectLeaders)
+            {
+                <option value="@leader.Employee_Id">[@leader.Employee_Id] @leader.FirstName @leader.LastName</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="form-group pb-2">
+        <label for="startDate"><span class="text-muted">*</span> Start Date</label>
+        <InputDate id="startDate" class="form-control" @bind-Value="updatedProjectForm.StartDate" />
+    </div>
+
+    <div class="form-group pb-2">
+        <label for="deadline">Deadline</label>
+        <InputDate id="deadline" class="form-control" @bind-Value="updatedProjectForm.Deadline" />
+    </div>
+
+    <div class="form-group pb-2">
+        <label for="status"><span class="text-muted">*</span> Project Status</label>
+        <InputSelect id="status" class="form-control" @bind-Value="updatedProjectForm.Status">
+            @foreach (var status in Enum.GetValues(typeof(ProjectStatus)).Cast<ProjectStatus>())
+            {
+                <option value="@status">@status</option>
+            }
+        </InputSelect>
+    </div>
+
+    <!-- Services Section (Only Updating, No Adding New Services) -->
+    <h5 class="fw-bold mt-5 mb-4 text-decoration-underline">Services</h5>
+    <div class="row">
+        @foreach (var serviceForm in serviceForms)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card p-3 shadow-sm">
+                    <div class="form-group pb-2">
+                        <label for="serviceName">Service Name</label>
+                        <InputText id="serviceName" class="form-control" @bind-Value="serviceForm.Service_Name" />
+                    </div>
+
+                    <div class="form-group pb-2">
+                        <label for="serviceDescription">Service Description</label>
+                        <InputText id="serviceDescription" class="form-control" @bind-Value="serviceForm.Service_Description" />
+                    </div>
+
+                    <div class="form-group pb-2">
+                        <label for="servicePrice">Service Price</label>
+                        <InputNumber id="servicePrice" class="form-control" @bind-Value="serviceForm.Service_Price" />
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3 mb-5 float-md-end">Update Project</button>
+</EditForm>
+
+<p class="@messageClass">@message</p>
+
+@code {
+    [Parameter] public int id { get; set; }
+    private ProjectRegistrationForm updatedProjectForm = new();
+    private List<Employee> ProjectLeaders = new();
+    private string message = "";
+    private string messageClass = "";
+    private List<ServiceRegistrationForm> serviceForms = new(); // Only for updating services
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Fetch the project details to be edited
+            var project = await ProjectService.GetProjectByIdAsync(id);
+            if (project != null)
+            {
+                // Map the project details to the form model
+                updatedProjectForm = new ProjectRegistrationForm
+                    {
+                        Customer_Name = project.Customer_Name,
+                        FirstName = project.ContactPerson_FirstName,
+                        LastName = project.ContactPerson_LastName,
+                        Email = project.ContactPerson_Email,
+                        Phone = project.ContactPerson_Phone,
+                        ProjectLeader_Id = project.ProjectLeader_Id,
+                        StartDate = project.StartDate,
+                        Deadline = project.Deadline,
+                        Status = (Data.Entities.ProjectStatus)project.ProjectStatus
+                    };
+
+                // Fetch associated services for the project
+                var services = await ServiceService.GetAllServicesByProjectIdAsync(id);
+                serviceForms = services.Select(s => new ServiceRegistrationForm
+                    {
+                        Service_Name = s.Service_Name,
+                        Service_Description = s.Service_Description,
+                        Service_Price = s.Service_Price,
+                        Service_Id = s.Service_Id
+                    }).ToList();
+            }
+            else
+            {
+                message = "Project not found!";
+                messageClass = "text-danger";
+            }
+
+            // Fetch project leaders for the dropdown
+            ProjectLeaders = await EmployeeService.GetAllEmployees();
+        }
+        catch (Exception ex)
+        {
+            message = $"Error fetching project details: {ex.Message}";
+            messageClass = "text-danger fw-bold";
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        // Trim whitespace from string fields
+        foreach (var property in updatedProjectForm.GetType().GetProperties())
+        {
+            if (property.PropertyType == typeof(string))
+            {
+                var currentValue = (string?)property.GetValue(updatedProjectForm);
+                if (!string.IsNullOrEmpty(currentValue))
+                {
+                    property.SetValue(updatedProjectForm, currentValue.Trim());
+                }
+            }
+        }
+
+        try
+        {
+            // Update project details
+            var updatedProject = await ProjectService.UpdateProjectAsync(id, updatedProjectForm);
+            if (updatedProject != null)
+            {
+                
+                foreach (var serviceForm in serviceForms)
+                {
+                    if (serviceForm.Service_Id > 0) 
+                    {
+                        await ServiceService.UpdateServiceAsync(serviceForm.Service_Id, serviceForm);
+                    }
+                }
+
+                message = "Project updated successfully!";
+                messageClass = "text-success fw-bold";
+
+                NavigationManager.NavigateTo("/"); // Redirect to home page (projects list)
+            }
+            else
+            {
+                message = "Error updating project. Please try again.";
+                messageClass = "text-danger fw-bold";
+            }
+        }
+        catch (Exception ex)
+        {
+            message = $"Error: {ex.Message}";
+            messageClass = "text-danger fw-bold";
+        }
+    }
+}

@@ -5,15 +5,17 @@ using Business.Interfaces;
 using Business.Models;
 using Data.Entities;
 using Data.Interfaces;
+using Data.Repositories;
 using System.Diagnostics;
 
 namespace Business.Services;
 
-public class EmployeeServices(IEmployeeRepository employeeRepository, IEmployee_RoleRepository employeeRoleRepository, IEmployeeFactory employeeFactory) : IEmployeeServices
+public class EmployeeServices(IEmployeeRepository employeeRepository, IEmployee_RoleRepository employeeRoleRepository, IEmployeeFactory employeeFactory, IProjectRepository projectRepository) : IEmployeeServices
 {
     private readonly IEmployeeRepository _employeeRepository = employeeRepository;
     private readonly IEmployee_RoleRepository _employeeRoleRepository = employeeRoleRepository;
     private readonly IEmployeeFactory _employeeFactory = employeeFactory;
+    private readonly IProjectRepository _projectRepository = projectRepository;
 
     public async Task<Employee> CreateEmployeeAsync(EmployeeRegistrationForm form)
     {
@@ -53,7 +55,7 @@ public class EmployeeServices(IEmployeeRepository employeeRepository, IEmployee_
         }
     }
 
-    public async Task<IEnumerable<Employee>> GetAllEmployees()
+    public async Task<List<Employee>> GetAllEmployees()
     {
 
         try
@@ -72,7 +74,7 @@ public class EmployeeServices(IEmployeeRepository employeeRepository, IEmployee_
         catch (Exception ex)
         {
             Debug.WriteLine($"Error fetching employees:: {ex.Message}");
-            return null!;;
+            return null!; ;
         }
     }
 
@@ -94,7 +96,7 @@ public class EmployeeServices(IEmployeeRepository employeeRepository, IEmployee_
         catch (Exception ex)
         {
             Debug.WriteLine($"Error fetching employee:: {ex.Message}");
-            return null!;;
+            return null!; ;
         }
     }
 
@@ -181,6 +183,16 @@ public class EmployeeServices(IEmployeeRepository employeeRepository, IEmployee_
                 return false;
             }
 
+            // Check if the employee is assigned as a Project Leader
+            var conflictingProjects = await _projectRepository.GetAllAsync(p => p.ProjectLeader_Id == userId);
+
+            if (conflictingProjects.Any())
+            {
+                var projectNumbers = string.Join(", ", conflictingProjects.Select(p => p.ProjectNumber));
+                Debug.WriteLine($"Cannot delete Employee Id: {userId}. Assigned as Project Leader in projects: {projectNumbers}");
+                return false; // Prevent deletion
+            }
+
             var deleted = await _employeeRepository.DeleteAsync(e => e.Employee_Id == userId);
 
             if (!deleted)
@@ -200,6 +212,7 @@ public class EmployeeServices(IEmployeeRepository employeeRepository, IEmployee_
             return false;
         }
     }
+
 
 
 

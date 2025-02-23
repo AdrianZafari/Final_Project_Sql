@@ -31,7 +31,7 @@ public class ProjectEntity
 
     [Required]
     [EnumDataType(typeof(ProjectStatus))]
-    public ProjectStatus Status { get; set; } = ProjectStatus.Ongoing; // Auto assigned with default variable
+    public ProjectStatus Status { get; set; } = ProjectStatus.Active; // Auto assigned with default variable
 
 
 
@@ -50,7 +50,7 @@ public class ProjectEntity
 
 public enum ProjectStatus
 {
+    Active,
     Completed,
-    Ongoing,
     Inactive
 }
