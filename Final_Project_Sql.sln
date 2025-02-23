@@ -11,6 +11,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Business", "Business\Busine
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Final_Project.Api", "Final_Project.Api\Final_Project.Api.csproj", "{A8AF0BDB-B9DD-4463-BFF0-199A5FBC7900}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{44A6D20F-98B7-4990-9F98-DD7FE921E233}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GUI_project", "GUI_project\GUI_project.csproj", "{B4017CBD-43F3-4727-9289-FFCE1780EAF8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +40,11 @@ Global
 		{A8AF0BDB-B9DD-4463-BFF0-199A5FBC7900}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A8AF0BDB-B9DD-4463-BFF0-199A5FBC7900}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A8AF0BDB-B9DD-4463-BFF0-199A5FBC7900}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4017CBD-43F3-4727-9289-FFCE1780EAF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4017CBD-43F3-4727-9289-FFCE1780EAF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4017CBD-43F3-4727-9289-FFCE1780EAF8}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{B4017CBD-43F3-4727-9289-FFCE1780EAF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4017CBD-43F3-4727-9289-FFCE1780EAF8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

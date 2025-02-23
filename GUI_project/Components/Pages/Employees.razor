@@ -1,0 +1,23 @@
+﻿@page "/employees"
+@using Business.Interfaces
+@inject NavigationManager NavigationManager
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="fw-bold">Employees</h1>
+    <button class="btn btn-primary" style="width: 20%;" @onclick="NavigateToCreate">
+        Create New Project
+    </button>
+</div>
+
+@code {
+    // Navigation functionality
+    private void NavigateToCreate()
+    {
+        NavigationManager.NavigateTo("/create-employee");
+    }
+
+    private void NavigateToEdit(string EmployeeId)
+    {
+        NavigationManager.NavigateTo($"/edit-employee?userId={EmployeeId}");
+    }
+}

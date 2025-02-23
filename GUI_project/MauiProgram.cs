@@ -8,7 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
 
-namespace AppGUI
+namespace GUI_project
 {
     public static class MauiProgram
     {
@@ -22,8 +22,22 @@ namespace AppGUI
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 });
 
-            builder.Services.AddMauiBlazorWebView();
+            // Load Configuration from appsettings.json in wwwroot
+            var appSettingsFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "appsettings.json");
+            if (File.Exists(appSettingsFilePath))
+            {
+                var config = new ConfigurationBuilder()
+                    .AddJsonFile(appSettingsFilePath, optional: false, reloadOnChange: true)
+                    .Build();
 
+                builder.Configuration.AddConfiguration(config);
+            }
+            else
+            {
+                throw new FileNotFoundException("appsettings.json not found");
+            }
+
+            builder.Services.AddMauiBlazorWebView();
 
             // Register Repositories
             builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
@@ -42,10 +56,13 @@ namespace AppGUI
             builder.Services.AddScoped<IProjectServices, ProjectServices>();
             builder.Services.AddScoped<IServiceServices, ServiceServices>();
 
+            // Register Database Context (Assuming You Have DbContext)
+            string connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
+            builder.Services.AddDbContext<DataContext>(options => options.UseSqlServer(connectionString));
 
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
 
             return builder.Build();
