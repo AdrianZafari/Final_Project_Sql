@@ -42,7 +42,7 @@ namespace Tests.Business_UnitTests.Service_Tests
             _employeeRoleRepository = new Employee_RoleRepository(_context);
             _projectFactory = new ProjectFactory(_customerRepository, _contactPersonRepository, _employeeRepository);
             _employeeFactory = new EmployeeFactory(_employeeRoleRepository);
-            _employeeServices = new EmployeeServices(_employeeRepository, _employeeRoleRepository, _employeeFactory);
+            _employeeServices = new EmployeeServices(_employeeRepository, _employeeRoleRepository, _employeeFactory, _projectRepository);
 
             // Setup services
             _projectServices = new ProjectServices(
@@ -280,7 +280,7 @@ namespace Tests.Business_UnitTests.Service_Tests
                 Customer_Name = "Something Fast and Quite Furious",
                 Email = "dominic@domain.com",
                 ProjectLeader_Id = employeeEntity1.Employee_Id,
-                Status = ProjectStatus.Completed
+                Status = Data.Entities.ProjectStatus.Completed
             };
 
 
@@ -292,7 +292,7 @@ namespace Tests.Business_UnitTests.Service_Tests
             // Assert
             Assert.NotNull(updatedProject);
             Assert.NotNull(updatedProject.EndDate);
-            Assert.Equal(ProjectStatus.Completed, updatedProject.ProjectStatus);
+            Assert.Equal(Business.Models.ProjectStatus.Completed, updatedProject.ProjectStatus);
             Assert.Equal("Very",updatedLeader.FirstName);
             Assert.Equal("Sleep-Deprived", updatedLeader.LastName);
             Assert.Equal("Dominica", updatedContact.FirstName);
