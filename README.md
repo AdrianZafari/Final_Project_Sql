@@ -1,1 +1,11 @@
 # Final_Project_Sql
+
+## PLEASE UPDATE THE ALL INSTANCES OF CONNECTION STRING TO THE DIRECTORY YOU HAVE THE LOCAL DATABASE (.mdf) SAVED IN, OTHERWISE IT WILL NOT WORK
+
+A fast way of doing this is by pressing `CTRL + F` and searching by `UseSqlServer` to find all instances this appears. I cannot guarantee that the string formatting is consistent so I leave that in your hands. 
+
+### How to use
+The Application is pretty self contained and should be rather clear on how to use based on the instructions provided in the different pages. 
+Create an Employee first then create a your Project. 
+Delete an Employee referenced in a Project and the backend will get upset with you (sorry). 
+I wrote warnings, but it's on you to follow them.  
